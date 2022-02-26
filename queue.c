@@ -11,6 +11,8 @@
  *   cppcheck-suppress nullPointer
  */
 
+char *val(struct list_head *l);
+
 /*
  * Create empty queue.
  * Return NULL if could not allocate space.
@@ -226,7 +228,35 @@ bool q_delete_mid(struct list_head *head)
 bool q_delete_dup(struct list_head *head)
 {
     // https://leetcode.com/problems/remove-duplicates-from-sorted-list-ii/
+    if (!head || list_empty(head))
+        return false;
+
+    struct list_head *node = head->next;
+    // iterate node and check whether there are duplicates
+    // if val(node) == val(node->next), there are duplicates
+    // and we have to check whether node->next exists
+    while (node != head) {
+        if (node->next != head && strcmp(val(node), val(node->next)) == 0) {
+            // there are duplicates, iterate to delete the node
+            char *tar_val = strdup(val(node));  // copy the target value
+            while (node != head && strcmp(val(node), tar_val) == 0) {
+                struct list_head *del = node;
+                node = node->next;
+                // delete del
+                list_del(del);
+                q_release_element(list_entry(del, element_t, list));
+            }
+            free(tar_val);
+        } else {
+            node = node->next;
+        }
+    }
     return true;
+}
+
+char *val(struct list_head *l)
+{
+    return (list_entry(l, element_t, list))->value;
 }
 
 /*
@@ -235,6 +265,23 @@ bool q_delete_dup(struct list_head *head)
 void q_swap(struct list_head *head)
 {
     // https://leetcode.com/problems/swap-nodes-in-pairs/
+    if (!head || list_empty(head) || list_is_singular(head))
+        return;
+
+    // Dealing with element_t or list_head is complicated
+    // So i decide to swap the value in element_t
+    // Use tar to iterate the list
+    struct list_head *tar = head->next;
+    while (tar != head && tar->next != head) {
+        char *val1 = val(tar);
+        // Swap
+        list_entry(tar, element_t, list)->value =
+            list_entry(tar->next, element_t, list)->value;
+        list_entry(tar->next, element_t, list)->value = val1;
+        // then move tar to next pair
+        tar = tar->next->next;
+    }
+    return;
 }
 
 /*
