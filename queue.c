@@ -47,6 +47,29 @@ void q_free(struct list_head *l)
  */
 bool q_insert_head(struct list_head *head, char *s)
 {
+    if (!head)
+        return false;
+
+    // create a new element_t
+    element_t *new_ele = malloc(sizeof(element_t));
+    if (!new_ele)
+        return false;
+
+    // init element_t new_ele
+    INIT_LIST_HEAD(&new_ele->list);
+
+    size_t len = strlen(s);
+    new_ele->value = malloc(sizeof(char) * (len + 1));
+
+    // if allocation failed, free and return
+    if (!new_ele->value) {
+        free(new_ele);
+        return false;
+    }
+    strncpy(new_ele->value, s, len);
+    new_ele->value[len] = '\0';
+
+    list_add(&new_ele->list, head);
     return true;
 }
 
@@ -59,6 +82,28 @@ bool q_insert_head(struct list_head *head, char *s)
  */
 bool q_insert_tail(struct list_head *head, char *s)
 {
+    if (!head)
+        return false;
+
+    // create a new element_t
+    element_t *new_ele = malloc(sizeof(element_t));
+    if (!new_ele)
+        return false;
+
+    // init element_t new_ele
+    INIT_LIST_HEAD(&new_ele->list);
+
+    size_t len = strlen(s);
+    new_ele->value = malloc(sizeof(char) * (len + 1));
+    // if allocation failed, free and return
+    if (!new_ele->value) {
+        free(new_ele);
+        return false;
+    }
+    strncpy(new_ele->value, s, len);
+    new_ele->value[len] = '\0';
+
+    list_add_tail(&new_ele->list, head);
     return true;
 }
 
