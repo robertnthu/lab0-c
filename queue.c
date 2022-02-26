@@ -173,7 +173,15 @@ void q_release_element(element_t *e)
  */
 int q_size(struct list_head *head)
 {
-    return -1;
+    if (!head)
+        return 0;
+
+    int len = 0;
+    struct list_head *li;
+
+    list_for_each (li, head)
+        len++;
+    return len;
 }
 
 /*
@@ -187,6 +195,22 @@ int q_size(struct list_head *head)
 bool q_delete_mid(struct list_head *head)
 {
     // https://leetcode.com/problems/delete-the-middle-node-of-a-linked-list/
+    // check if head == NULL or queue is empty
+    if (!head || list_empty(head))
+        return false;
+
+    // Use fast and slow pointer technique
+    // pointer of pointer is to prevent using another pointer to record the
+    // previous node
+    struct list_head *mid = head->next;
+    for (struct list_head *fast = head->next;
+         fast != head && fast->next != head; fast = fast->next->next) {
+        mid = mid->next;
+    }
+    //"indir" is the middle list_node, we want to delete this element_t
+    list_del(mid);
+    q_release_element(list_entry(mid, element_t, list));
+
     return true;
 }
 
