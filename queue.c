@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,6 +13,10 @@
  */
 
 char *val(struct list_head *l);
+struct list_head *merge_sort(struct list_head *);
+struct list_head *find_mid(struct list_head *);
+struct list_head *cut_list(struct list_head *);
+struct list_head *mergeTwoLists(struct list_head *, struct list_head *);
 
 /*
  * Create empty queue.
@@ -310,4 +315,93 @@ void q_reverse(struct list_head *head)
  * No effect if q is NULL or empty. In addition, if q has only one
  * element, do nothing.
  */
-void q_sort(struct list_head *head) {}
+void q_sort(struct list_head *head)
+{
+    if (!head || list_empty(head) || list_is_singular(head))
+        return;
+    // For convenience, i delete head at first
+    struct list_head *tmp_head = head->next;
+    list_del_init(head);
+    // cut_list to cancel the linked list cycle
+    tmp_head = cut_list(tmp_head->prev);
+    // then sort 'tmp_head'.
+    tmp_head = merge_sort(tmp_head);
+
+    // we need to recover the prev link
+    // Add prev link back
+    struct list_head *tmp;
+    for (tmp = tmp_head; tmp->next != NULL; tmp = tmp->next) {
+        tmp->next->prev = tmp;
+    }
+    // recover the cycle list structure and add 'head' back
+    head->next = tmp_head;
+    tmp_head->prev = head;
+    // tmp is the last node, so just set the link with head
+    tmp->next = head;
+    head->prev = tmp;
+}
+
+struct list_head *merge_sort(struct list_head *head)
+{
+    if (!head || head->next == NULL)  // when head has only one node
+        return head;
+    // split
+    struct list_head *left, *right, *mid;
+    mid = find_mid(head);
+    left = head;
+    // cut_list cut the given list_head and its next list_head
+    // and return the next list_head
+    right = cut_list(mid);
+
+    // Then merge_sort both left and right
+    left = merge_sort(left);
+    right = merge_sort(right);
+
+    // Merge two sorted list
+    return mergeTwoLists(left, right);
+}
+
+struct list_head *find_mid(struct list_head *head)
+{
+    // Use fast and slow pointer technique
+    struct list_head *fast, *slow;
+    for (fast = head, slow = head;
+         fast->next != NULL && fast->next->next != NULL;
+         fast = fast->next->next) {
+        slow = slow->next;
+    }
+    return slow;
+}
+
+struct list_head *cut_list(struct list_head *head)
+{
+    struct list_head *next = head->next;
+    head->next = NULL;
+    next->prev = NULL;
+    return next;
+}
+
+struct list_head *mergeTwoLists(struct list_head *L1, struct list_head *L2)
+{
+    struct list_head *head = NULL, **ptr = &head, **node;
+
+    for (node = NULL; L1 && L2; *node = (*node)->next) {
+        // node is the pointer of the pointer 'next'
+        // if node = &L1, it means that *node = L1
+        // then *node = (*node)->next is equal to L1 = L1->next
+        // so node always keep the pointer of pointer 'next'
+        // node = (val(L1) < val(L2)) ? &L1 : &L2;
+        node = (strcmp(val(L1), val(L2)) < 0) ? &L1 : &L2;
+        *ptr = *node;
+        // ptr is to concate the list at the end
+        // *ptr = (*ptr)->next
+        ptr = &(*ptr)->next;  // move prt to its next node
+    }
+    // *ptr = L1 or L2, concate the list
+    *ptr = (struct list_head *) ((uintptr_t) L1 | (uintptr_t) L2);
+    // Why return head. At the beginning, we set **ptr = *head,
+    // so *ptr = head. In the first iteration, we make *ptr = *node,
+    // where *node = L1 or L2, this equal to head = L1 or L2. Then we move
+    // ptr = &(*ptr)->next, in other words, head was set in the first iteration.
+    return head;
+}
