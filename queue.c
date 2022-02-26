@@ -17,12 +17,27 @@
  */
 struct list_head *q_new()
 {
-    return NULL;
+    struct list_head *new = malloc(sizeof(struct list_head));
+    if (new) {
+        INIT_LIST_HEAD(new);
+    }
+    return new;
 }
 
 /* Free all storage used by queue */
-void q_free(struct list_head *l) {}
+void q_free(struct list_head *l)
+{
+    if (!l)
+        return;
 
+    struct list_head *tmp1, *tmp2;
+    list_for_each_safe (tmp1, tmp2, l) {
+        list_del(tmp1);
+        element_t *tmp = list_entry(tmp1, element_t, list);
+        q_release_element(tmp);
+    }
+    free(l);
+}
 /*
  * Attempt to insert element at head of queue.
  * Return true if successful.
