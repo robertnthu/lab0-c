@@ -631,9 +631,11 @@ bool do_sort(int argc, char *argv[])
     set_noallocate_mode(true);
     if (exception_setup(true)) {
         if (argc == 2 && !strcmp(argv[1], "linux")) {
-            list_sort(NULL, l_meta.l, compare_element_t);
-        } else {
             q_sort(l_meta.l);
+            // list_sort(NULL, l_meta.l, compare_element_t);
+        } else {
+            // q_sort(l_meta.l);
+            list_sort(NULL, l_meta.l, compare_element_t);
         }
     }
     exception_cancel();
