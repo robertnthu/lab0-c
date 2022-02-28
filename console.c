@@ -76,6 +76,7 @@ static void pop_file();
 
 static bool interpret_cmda(int argc, char *argv[]);
 
+
 /* Add a new command */
 void add_cmd(char *name, cmd_function operation, char *documentation)
 {

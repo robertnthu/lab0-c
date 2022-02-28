@@ -50,6 +50,9 @@
 static int big_list_size = BIG_LIST;
 
 
+void q_shuffle(struct list_head *head);
+
+
 /* Global variables */
 int compare_element_t(void *priv,
                       const struct list_head *l,
@@ -79,6 +82,12 @@ static const char charset[] = "abcdefghijklmnopqrstuvwxyz";
 
 /* Forward declarations */
 static bool show_queue(int vlevel);
+
+// test adding "do_hello"
+static bool do_hello(int argc, char *argv[])
+{
+    return (bool) printf("Hello, World\n");
+}
 
 static bool do_free(int argc, char *argv[])
 {
@@ -764,6 +773,25 @@ static bool show_queue(int vlevel)
     return ok;
 }
 
+// do_shuffle
+static bool do_shuffle(int argc, char *argv[])
+{
+    if (argc != 1) {
+        report(1, "%s takes no arguments", argv[0]);
+        return false;
+    }
+    if (!l_meta.l)
+        report(3, "Warning: Calling reverse on null queue");
+    error_check();
+
+    if (exception_setup(true))
+        q_shuffle(l_meta.l);
+    exception_cancel();
+
+    show_queue(3);
+    return true && !error_check();
+}
+
 static bool do_show(int argc, char *argv[])
 {
     if (argc != 1) {
@@ -772,6 +800,7 @@ static bool do_show(int argc, char *argv[])
     }
     return show_queue(0);
 }
+
 
 static void console_init()
 {
@@ -806,6 +835,8 @@ static void console_init()
         dedup, "                | Delete all nodes that have duplicate string");
     ADD_COMMAND(swap,
                 "                | Swap every two adjacent nodes in queue");
+    ADD_COMMAND(shuffle, "                | Shuffle the whole queue");
+    ADD_COMMAND(hello, "                | Print hello message");
     add_param("length", &string_length, "Maximum length of displayed string",
               NULL);
     add_param("malloc", &fail_probability, "Malloc failure probability percent",

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "harness.h"
 #include "queue.h"
@@ -404,4 +405,34 @@ struct list_head *mergeTwoLists(struct list_head *L1, struct list_head *L2)
     // where *node = L1 or L2, this equal to head = L1 or L2. Then we move
     // ptr = &(*ptr)->next, in other words, head was set in the first iteration.
     return head;
+}
+
+// shuflle the list
+void q_shuffle(struct list_head *head)
+{
+    srand(time(NULL));
+
+    // First, we have to know how long is the linked list
+    int len = q_size(head);
+
+    // Append shuffling result to another linked list
+    struct list_head *new = NULL, *indirect;
+
+    while (len) {
+        int random = rand() % len;
+        indirect = head->next;
+
+        while (random--)
+            indirect = indirect->next;
+        list_del_init(indirect);
+
+        if (new) {
+            list_add_tail(indirect, new);
+        } else
+            new = indirect;
+
+        len--;
+    }
+
+    list_add_tail(head, new);
 }
