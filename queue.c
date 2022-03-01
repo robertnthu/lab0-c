@@ -268,6 +268,27 @@ char *val(struct list_head *l)
 /*
  * Attempt to swap every two adjacent nodes.
  */
+// void q_swap(struct list_head *head)
+// {
+//     // https://leetcode.com/problems/swap-nodes-in-pairs/
+//     if (!head || list_empty(head) || list_is_singular(head))
+//         return;
+
+//     // Dealing with element_t or list_head is complicated
+//     // So i decide to swap the value in element_t
+//     // Use tar to iterate the list
+//     struct list_head *tar = head->next;
+//     while (tar != head && tar->next != head) {
+//         char *val1 = val(tar);
+//         // Swap
+//         list_entry(tar, element_t, list)->value =
+//             list_entry(tar->next, element_t, list)->value;
+//         list_entry(tar->next, element_t, list)->value = val1;
+//         // then move tar to next pair
+//         tar = tar->next->next;
+//     }
+//     return;
+// }
 void q_swap(struct list_head *head)
 {
     // https://leetcode.com/problems/swap-nodes-in-pairs/
@@ -277,18 +298,14 @@ void q_swap(struct list_head *head)
     // Dealing with element_t or list_head is complicated
     // So i decide to swap the value in element_t
     // Use tar to iterate the list
-    struct list_head *tar = head->next;
-    while (tar != head && tar->next != head) {
-        char *val1 = val(tar);
-        // Swap
-        list_entry(tar, element_t, list)->value =
-            list_entry(tar->next, element_t, list)->value;
-        list_entry(tar->next, element_t, list)->value = val1;
-        // then move tar to next pair
-        tar = tar->next->next;
+    for (struct list_head *tar = head->next; tar != head && tar->next != head;
+         tar = tar->next) {
+        list_del(tar);
+        list_add(tar, tar->next);
     }
     return;
 }
+
 
 /*
  * Reverse elements in queue
